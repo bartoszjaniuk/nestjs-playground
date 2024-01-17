@@ -1,0 +1,133 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// model User {
+//   id Int @id @default(autoincrement())
+//   createdAt DateTime @default(now())
+//   updatedAt DateTime @updatedAt
+
+  // email String @unique
+  // password String
+  // username String? @unique
+  // avatar String?
+  // bio String?
+
+//   chats UsersChats[]
+
+//   // messageId Int @unique
+//   // message Message @relation(fields: [messageId], references: [id])
+//   message Message?
+
+// }
+
+// model Chat {
+//     id Int @id @default(autoincrement())
+//     createdAt DateTime @default(now())
+//     updatedAt DateTime @updatedAt
+    
+//     title String
+
+//     users UsersChats[]
+//     messages Message[]
+
+// }
+
+// model Message {
+//     id Int @id @default(autoincrement())
+//     createdAt DateTime @default(now())
+//     updatedAt DateTime @updatedAt
+//     content String
+
+//     // author User?
+
+//     user User @relation(fields: [userId], references: [id])
+//     userId Int @unique
+    
+
+//     chat Chat @relation(fields: [chatId], references: [id])
+//     chatId Int
+// }
+
+// model UsersChats  {
+//   userId Int
+//   user User @relation(fields: [userId], references: [id])
+
+//   chatId Int
+//   chat Chat @relation(fields: [chatId], references: [id])
+
+//   @@id([userId, chatId])
+// }
+
+
+
+
+model User {
+  id Int @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  email String @unique
+  password String
+  username String? @unique
+  avatar String?
+  bio String?
+
+  refreshToken String
+
+  chats UsersChats[]
+  messages Message[]
+}
+
+model Chat {
+  id Int @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  title String
+  
+  users UsersChats[]
+  messages Message[]
+}
+
+model Message {
+  id Int @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  chatId Int
+  chat Chat @relation(fields: [chatId], references: [id])
+
+  authorId Int
+  author User @relation(fields: [authorId], references: [id])
+}
+
+
+model UsersChats  {
+  user User @relation(fields: [userId], references: [id])
+  userId Int
+
+  chat Chat @relation(fields: [chatId], references: [id])
+  chatId Int
+
+  @@id([userId, chatId])
+}
+
+
+
+// One user can have many Chat
+// One Chat can have many Users
+
+// One Chat can have many Messages
+
+
+// One message can have one Chat
+
