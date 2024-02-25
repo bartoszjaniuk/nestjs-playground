@@ -1,3 +1,3 @@
 export class CreateChatDto {
-  title: string;
+  chatId: number;
 }

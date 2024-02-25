@@ -1,29 +1,31 @@
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
-import { DatabaseService } from 'src/database/database.service';
-import { excludeField } from '../utils/excludeField';
-import { Injectable, UnauthorizedException } from '@nestjs/common';
-
-// For validating access token
+import { Injectable } from '@nestjs/common';
+import { Request } from 'express';
+import { ValidatePayload } from './refreshToken.strategy';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
-  constructor(private db: DatabaseService) {
+  constructor() {
     super({
-      jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+      jwtFromRequest: ExtractJwt.fromExtractors([
+        JwtStrategy.extractJWT,
+        ExtractJwt.fromAuthHeaderAsBearerToken(),
+      ]),
+      ignoreExpiration: false,
       secretOrKey: process.env.JWT_SECRET,
+      passReqToCallback: true,
     });
   }
-  async validate(payload: { sub: number; email: string }) {
-    const user = await this.db.user.findUnique({
-      where: {
-        id: payload.sub,
-      },
-    });
 
-    if (!user) {
-      throw new UnauthorizedException();
+  async validate(req: Request, payload: ValidatePayload) {
+    return { id: payload.sub };
+  }
+
+  private static extractJWT(req: Request): string | null {
+    if (req.cookies && req.cookies.access_token) {
+      return req.cookies.access_token;
     }
-    return excludeField(user, 'password');
+    return null;
   }
 }

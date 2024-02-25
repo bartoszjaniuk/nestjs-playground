@@ -5,25 +5,46 @@ import {
   Param,
   Delete,
   UseGuards,
+  Body,
 } from '@nestjs/common';
 import { ChatService } from './chat.service';
 import { JwtGuard } from 'src/auth/guard';
-import { GetUser } from 'src/auth/decorator';
+import { GetUser, GetUserId } from 'src/auth/decorator';
 import { User } from '@prisma/client';
+import { ChatGateway } from './chat.gateway';
+
+type CreateChatDto = {
+  userId: number;
+  username: string;
+};
 
 @UseGuards(JwtGuard)
 @Controller('chat')
 export class ChatController {
-  constructor(private readonly chatService: ChatService) {}
+  constructor(
+    private readonly chatService: ChatService,
+    private chatGateway: ChatGateway,
+  ) {}
+
+  @Get('threads')
+  getThreads(@GetUserId() id: string) {
+    return this.chatService.getUserThreads(+id);
+  }
+
+  @Get(':id/messages')
+  getChatMessages(@Param('id') id: string) {
+    return this.chatService.getChatMessages(+id);
+  }
 
   @Get(':id')
   getChat(@Param('id') id: string) {
     return this.chatService.getChat(+id);
   }
 
-  @Post('create/:recipientId')
-  createChat(@Param('chatId') chatId: string, @GetUser() user: User) {
-    return this.chatService.createChat(user, { userId: 2, username: 'Zdzich' });
+  @Post('create')
+  createChat(@GetUser() user: User, @Body() createChatDto: CreateChatDto) {
+    this.chatGateway.server.emit('joinRoom');
+    return this.chatService.createChat(user, createChatDto);
   }
 
   @Delete('leave/:chatId')

@@ -10,6 +10,7 @@ import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 import { JwtService } from '@nestjs/jwt';
 import { CreateUserDto } from './dto/createUser.dto';
 import { UserService } from 'src/user/user.service';
+import { Response } from 'express';
 
 @Injectable() // it means that this service will use dependency injection
 export class AuthService {
@@ -40,16 +41,16 @@ export class AuthService {
         },
       });
 
-      const { accessToken, refreshToken } = await this.signTokens(
+      const { access_token, refresh_token } = await this.signTokens(
         user.id,
         user.email,
       );
 
-      await this.updateRefreshToken(user.id, refreshToken);
+      await this.updateRefreshToken(user.id, refresh_token);
 
       return {
-        accessToken,
-        refreshToken,
+        access_token,
+        refresh_token,
         user: {
           email: user.email,
           avatar: user.avatar,
@@ -79,16 +80,16 @@ export class AuthService {
     if (!isPasswordMatch)
       throw new ForbiddenException('Invalid email or password');
 
-    const { accessToken, refreshToken } = await this.signTokens(
+    const { access_token, refresh_token } = await this.signTokens(
       user.id,
       user.email,
     );
 
-    await this.updateRefreshToken(user.id, refreshToken);
+    await this.updateRefreshToken(user.id, refresh_token);
 
     return {
-      accessToken,
-      refreshToken,
+      access_token,
+      refresh_token,
       user: {
         email: user.email,
         avatar: user.avatar,
@@ -97,27 +98,27 @@ export class AuthService {
     };
   }
 
-  async logout(userId: number) {
-    return this.userService.update(userId, { refreshToken: '' });
+  async logout(userId: number): Promise<void> {
+    this.userService.update(userId, { refreshToken: '' });
   }
 
   async signTokens(
     userId: number,
     email: string,
-  ): Promise<{ accessToken: string; refreshToken: string }> {
+  ): Promise<{ access_token: string; refresh_token: string }> {
     const payload = { sub: userId, email };
 
-    const accessToken = await this.jwt.signAsync(payload, {
-      expiresIn: '1m',
-      secret: process.env.JWT_REFRESH_SECRET,
+    const access_token = await this.jwt.signAsync(payload, {
+      expiresIn: '15m',
+      secret: process.env.JWT_SECRET,
     });
 
-    const refreshToken = await this.jwt.signAsync(payload, {
+    const refresh_token = await this.jwt.signAsync(payload, {
       expiresIn: '7d',
       secret: process.env.JWT_REFRESH_SECRET,
     });
 
-    return { accessToken, refreshToken };
+    return { access_token, refresh_token };
   }
 
   async refreshTokens(id: number, refreshToken: string) {
@@ -130,7 +131,7 @@ export class AuthService {
     );
     if (!refreshTokenMatches) throw new ForbiddenException('Access Denied');
     const tokens = await this.signTokens(user.id, user.email);
-    await this.updateRefreshToken(user.id, tokens.refreshToken);
+    await this.updateRefreshToken(user.id, tokens.refresh_token);
     return tokens;
   }
 
@@ -138,6 +139,22 @@ export class AuthService {
     const hashedRefreshToken = await argon.hash(refreshToken);
     await this.userService.update(userId, {
       refreshToken: hashedRefreshToken,
+    });
+  }
+
+  storeTokenInCookie(
+    res: Response,
+    tokens: { access_token: string; refresh_token: string },
+  ) {
+    res.cookie('access_token', tokens.access_token, {
+      maxAge: 1000 * 60 * 15,
+      httpOnly: true,
+      secure: false,
+    });
+    res.cookie('refresh_token', tokens.refresh_token, {
+      maxAge: 1000 * 60 * 60 * 24 * 7,
+      httpOnly: true,
+      secure: false,
     });
   }
 }
