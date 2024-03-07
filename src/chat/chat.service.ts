@@ -90,7 +90,7 @@ export class ChatService {
 
     const chat = await this.db.chat.create({
       data: {
-        title: `${currentUser.username} + ${recipient.username} chat`,
+        title: `${recipient.username} + ${currentUser.username} chat`,
       },
     });
 
@@ -154,7 +154,6 @@ export class ChatService {
         messages: true,
       },
     });
-    console.log('getAllMessages from chat.service');
     return messages;
   }
 
@@ -175,12 +174,22 @@ export class ChatService {
                 author: true,
               },
             },
+            users: {
+              select: {
+                user: {
+                  select: {
+                    username: true,
+                  },
+                },
+              },
+            },
           },
         },
       },
     });
 
     const shapedThreads = threads.map((thread) => ({
+      users: thread.chat.users.map((u) => u.user.username),
       chatId: thread.chatId,
       title: thread.chat.title,
       lastMessage: thread.chat.messages[0]

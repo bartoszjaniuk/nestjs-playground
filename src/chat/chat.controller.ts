@@ -27,8 +27,8 @@ export class ChatController {
   ) {}
 
   @Get('threads')
-  getThreads(@GetUserId() id: string) {
-    return this.chatService.getUserThreads(+id);
+  async getThreads(@GetUserId() id: string) {
+    return await this.chatService.getUserThreads(+id);
   }
 
   @Get(':id/messages')
@@ -42,9 +42,12 @@ export class ChatController {
   }
 
   @Post('create')
-  createChat(@GetUser() user: User, @Body() createChatDto: CreateChatDto) {
+  async createChat(
+    @GetUser() user: User,
+    @Body() createChatDto: CreateChatDto,
+  ) {
     this.chatGateway.server.emit('joinRoom');
-    return this.chatService.createChat(user, createChatDto);
+    return await this.chatService.createChat(user, createChatDto);
   }
 
   @Delete('leave/:chatId')

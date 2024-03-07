@@ -9,8 +9,8 @@ import { GetUserFriendsDto } from './dto/get-user-friends.dto';
 export class UserService {
   constructor(private db: DatabaseService) {}
 
-  async update(id: number, user: UpdateUserDto): Promise<void> {
-    this.db.user.update({
+  async update(id: number, user: UpdateUserDto) {
+    return await this.db.user.update({
       where: {
         id,
       },
@@ -106,7 +106,7 @@ export class UserService {
   }
 
   async addFriend(userId: number, friendId: number): Promise<User> {
-    const user = await this.db.user.update({
+    await this.db.user.update({
       where: { id: userId },
       data: {
         friends: { connect: { id: friendId } },
@@ -114,12 +114,12 @@ export class UserService {
       include: { friends: true },
     });
 
-    await this.db.user.update({
+    const friend = await this.db.user.update({
       where: { id: friendId },
       data: {
         friends: { connect: { id: userId } },
       },
     });
-    return user;
+    return friend;
   }
 }

@@ -47,6 +47,7 @@ export class AuthController {
       sub,
       refreshToken,
     );
+
     this.authService.storeTokenInCookie(res, newAuthToken);
     res.status(200).send({ user: { id: sub } });
   }

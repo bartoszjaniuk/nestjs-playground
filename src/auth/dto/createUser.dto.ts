@@ -8,6 +8,7 @@ export class CreateUserDto {
   @IsNotEmpty()
   password: string;
 
-  //   username: string;
+  username: string;
+  avatar: string;
   refreshToken: string;
 }

@@ -38,6 +38,8 @@ export class AuthService {
           email: dto.email,
           password: passwordHashed,
           refreshToken: '',
+          avatar: dto.avatar,
+          username: dto.username,
         },
       });
 
@@ -94,6 +96,7 @@ export class AuthService {
         email: user.email,
         avatar: user.avatar,
         bio: user.bio,
+        id: user.id,
       },
     };
   }
@@ -137,7 +140,8 @@ export class AuthService {
 
   async updateRefreshToken(userId: number, refreshToken: string) {
     const hashedRefreshToken = await argon.hash(refreshToken);
-    await this.userService.update(userId, {
+
+    return await this.userService.update(userId, {
       refreshToken: hashedRefreshToken,
     });
   }

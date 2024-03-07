@@ -27,6 +27,7 @@ const createChatName = (chatId: number) => `chat-${chatId}`;
   cors: {
     origin: ['http://localhost:5173'],
     credentials: true,
+    methods: ['GET', 'POST', 'PUT'],
   },
 })
 @UseGuards(WsAuthGuard)
