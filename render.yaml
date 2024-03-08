@@ -1,24 +1,55 @@
 services:
   - type: web
-    name: nestjs-backend
+    name: backend
     env: docker
-    buildCommand: docker build -t nestjs-backend .
-    startCommand: docker run -p 3000:3000 nestjs-backend
+    buildCommand: docker build -t backend -f Dockerfile .
+    startCommand: docker run -p 3000:3000 backend
     envVars:
+      - key: NODE_ENV
+        value: production
       - key: DATABASE_URL
         fromDatabase:
-          name: postgres_db
-          property: connectionString
+          name: database
+          property: DATABASE_URL
       - key: JWT_SECRET
-        value: secret
+        fromSecret: JWT_SECRET
       - key: JWT_REFRESH_SECRET
-        value: secret refresh token
+        fromSecret: JWT_REFRESH_SECRET
       - key: WS_JWT_SECRET
-        value: web socket secret
-    dockerfilePath: Dockerfile
-    dockerComposeFilePath: docker-compose.yml
-    dockerComposeService: backend
-    databases:
-      - name: postgres_db
-        plan: starter-0
-    healthCheckCommand: curl -f http://localhost:3000/health
+        fromSecret: WS_JWT_SECRET
+    envSecrets:
+      - JWT_SECRET
+      - JWT_REFRESH_SECRET
+      - WS_JWT_SECRET
+    database:
+      name: database
+      plan: postgres-starter
+      region: us-east
+      databaseURL: DATABASE_URL
+      databaseURLSecret: DATABASE_URL
+      connectionLimit: 5
+    networks:
+      - nestjs_network
+
+  - type: pserv
+    name: database
+    plan: postgres-starter
+    region: us-east
+    databaseURL: DATABASE_URL
+    databaseURLSecret: DATABASE_URL
+    connectionLimit: 5
+    envVars:
+      - key: POSTGRES_USER
+        value: postgres_user
+      - key: POSTGRES_PASSWORD
+        value: postgres_password
+      - key: POSTGRES_DB
+        value: nest
+    envSecrets:
+      - POSTGRES_PASSWORD
+    networks:
+      - nestjs_network
+
+networks:
+  - name: nestjs_network
+    driver: bridge
