@@ -13,15 +13,16 @@ services:
       - key: PORT
         value: '3000'
       - key: DATABASE_URL
+      - key: JWT_SECRET
+        sync: false
+      - key: WS_JWT_SECRET
+        sync: false
+      - key: JWT_REFRESH_SECRET
+        sync: false
         fromDatabase:
           type: database
           name: database
           envVarKey: RENDER_SERVICE_NAME
-      - key: JWT_SECRET
-        fromEnvVar: JWT_SECRET
-      - key: JWT_REFRESH_SECRET
-        fromEnvVar: JWT_REFRESH_SECRET
-      - key: WS_JWT_SECRET
+
         fromEnvVar: WS_JWT_SECRET
     buildCommand: docker build -t backend -f Dockerfile .
-    startCommand: docker run -p 3000:3000 backend
