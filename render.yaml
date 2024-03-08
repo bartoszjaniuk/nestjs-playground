@@ -12,11 +12,11 @@ services:
           name: database
           property: DATABASE_URL
       - key: JWT_SECRET
-        fromSecret: JWT_SECRET
+        sync: false # will not be copied to preview environments
       - key: JWT_REFRESH_SECRET
-        fromSecret: JWT_REFRESH_SECRET
+        sync: false # will not be copied to preview environments
       - key: WS_JWT_SECRET
-        fromSecret: WS_JWT_SECRET
+        sync: false # will not be copied to preview environments
     envSecrets:
       - JWT_SECRET
       - JWT_REFRESH_SECRET
