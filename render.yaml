@@ -23,5 +23,5 @@ services:
         fromEnvVar: JWT_REFRESH_SECRET
       - key: WS_JWT_SECRET
         fromEnvVar: WS_JWT_SECRET
-    buildCommand: ...
-    startCommand: 'npm run start'
+    buildCommand: docker build -t backend -f Dockerfile .
+    startCommand: docker run -p 3000:3000 backend
