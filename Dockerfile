@@ -28,12 +28,12 @@
 
 
 # STAGE I: BUILD
-FROM node:18-alpine AS build
+FROM node:18 AS builder
 
-WORKDIR /app
+WORKDIR /usr/src/app
 
-ARG NODE_ENV=production
-ENV NODE_ENV=${NODE_ENV}
+# ARG NODE_ENV=production
+# ENV NODE_ENV=${NODE_ENV}
 
 COPY package*.json ./
 # TODO: CHECK IF THIS IS CORRECT
@@ -48,16 +48,16 @@ RUN ls -la
 RUN npm run build
 # TODO: CHECK IF THIS IS CORRECT
 RUN npx prisma generate
-RUN npx prisma migrate deploy
+# RUN npx prisma migrate deploy
 
 
 # STAGE II: PRODUCTION
 
-FROM node:18-alpine
+FROM node:18
 
-WORKDIR /app
+WORKDIR /usr/src/app
 
-COPY --from=build /app ./dist
+COPY --from=builder /usr/src/app ./dist
 
 COPY package*.json ./
 
