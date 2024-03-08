@@ -7,10 +7,10 @@ services:
     container_name: nestjs-postgres-prisma-docker-p2
     environment:
       - PORT=3000
-      - DATABASE_URL="postgresql://postgres_user:postgres_password@database:5432/nest?schema=public"
-      - JWT_SECRET="secret"
-      - JWT_REFRESH_SECRET="secret refresh token"
-      - WS_JWT_SECRET="web socket secret"
+      - DATABASE_URL=${DATABASE_URL}
+      - JWT_SECRET=${JWT_SECRET}
+      - JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET}
+      - WS_JWT_SECRET=${WS_JWT_SECRET}
     ports:
       - '3000:3000'
     depends_on:
