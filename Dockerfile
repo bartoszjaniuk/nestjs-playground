@@ -28,46 +28,43 @@
 
 
 # STAGE I: BUILD
-FROM node:18 AS builder
+FROM node:latest AS builder
 
-WORKDIR /usr/src/app
-
-# ARG NODE_ENV=production
-# ENV NODE_ENV=${NODE_ENV}
+WORKDIR /app
 
 COPY package*.json ./
-# TODO: CHECK IF THIS IS CORRECT
 COPY prisma ./prisma/
 
 RUN npm install
 
 COPY . .
 
-RUN ls -la
-
 RUN npm run build
-# TODO: CHECK IF THIS IS CORRECT
-RUN npx prisma generate
-# RUN npx prisma migrate deploy
-
 
 # STAGE II: PRODUCTION
 
-FROM node:18
+FROM node:latest
 
-WORKDIR /usr/src/app
+WORKDIR /app
 
-COPY --from=builder /usr/src/app ./dist
+ARG NODE_ENV=production
+ENV NODE_ENV=${NODE_ENV}
 
-COPY package*.json ./
 
-RUN npm install --only-PRODUCTION
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/package*.json ./
+COPY --from=builder /app/dist ./dist
 
-RUN rm package*.json
+
+# RUN npm install --only-PRODUCTION
+
+# RUN rm package*.json
 
 EXPOSE 3000
 
-CMD ["node", "dist/src/main.js"]
+CMD [ "npm", "run", "start:prod" ]
+
+# CMD ["node", "dist/src/main"]
 
 
 
