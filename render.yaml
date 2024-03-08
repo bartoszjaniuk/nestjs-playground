@@ -25,9 +25,3 @@ services:
         fromEnvVar: WS_JWT_SECRET
     buildCommand: ...
     startCommand: 'npm run start'
-    ports:
-      - '3000:3000'
-
-networks:
-  nestjs_network:
-    driver: bridge
