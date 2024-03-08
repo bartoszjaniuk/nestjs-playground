@@ -30,7 +30,7 @@
 # STAGE I: BUILD
 FROM node:18-alpine AS build
 
-WORKDIR /usr/src/app
+WORKDIR /app
 
 ARG NODE_ENV=production
 ENV NODE_ENV=${NODE_ENV}
@@ -55,9 +55,9 @@ RUN npx prisma migrate deploy
 
 FROM node:18-alpine
 
-WORKDIR /usr/src/app
+WORKDIR /app
 
-COPY --from=build /usr/src/app ./dist
+COPY --from=build /app ./dist
 
 COPY package*.json ./
 
