@@ -1,55 +1,33 @@
+databases:
+  - name: database
+    databaseName: nest
+    user: postgres_user
+    postgresMajorVersion: 13
+
 services:
   - type: web
     name: backend
     env: docker
-    buildCommand: docker build -t backend -f Dockerfile .
-    startCommand: docker run -p 3000:3000 backend
+    dockerfilePath: ./Dockerfile
     envVars:
-      - key: NODE_ENV
-        value: production
+      - key: PORT
+        value: '3000'
       - key: DATABASE_URL
         fromDatabase:
+          type: database
           name: database
-          property: DATABASE_URL
+          envVarKey: RENDER_SERVICE_NAME
       - key: JWT_SECRET
-        sync: false # will not be copied to preview environments
+        fromEnvVar: JWT_SECRET
       - key: JWT_REFRESH_SECRET
-        sync: false # will not be copied to preview environments
+        fromEnvVar: JWT_REFRESH_SECRET
       - key: WS_JWT_SECRET
-        sync: false # will not be copied to preview environments
-    envSecrets:
-      - JWT_SECRET
-      - JWT_REFRESH_SECRET
-      - WS_JWT_SECRET
-    database:
-      name: database
-      plan: postgres-starter
-      region: us-east
-      databaseURL: DATABASE_URL
-      databaseURLSecret: DATABASE_URL
-      connectionLimit: 5
-    networks:
-      - nestjs_network
-
-  - type: pserv
-    name: database
-    plan: postgres-starter
-    region: us-east
-    databaseURL: DATABASE_URL
-    databaseURLSecret: DATABASE_URL
-    connectionLimit: 5
-    envVars:
-      - key: POSTGRES_USER
-        value: postgres_user
-      - key: POSTGRES_PASSWORD
-        value: postgres_password
-      - key: POSTGRES_DB
-        value: nest
-    envSecrets:
-      - POSTGRES_PASSWORD
-    networks:
-      - nestjs_network
+        fromEnvVar: WS_JWT_SECRET
+    buildCommand: ...
+    startCommand: 'npm run start'
+    ports:
+      - '3000:3000'
 
 networks:
-  - name: nestjs_network
+  nestjs_network:
     driver: bridge
