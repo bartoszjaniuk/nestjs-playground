@@ -1,9 +1,9 @@
 services:
   - type: web
-    name: nestjs-app
+    name: nestjs-backend
     env: docker
-    buildCommand: docker build -t nestjs-app .
-    startCommand: docker run -p 3000:3000 nestjs-app
+    buildCommand: docker build -t nestjs-backend .
+    startCommand: docker run -p 3000:3000 nestjs-backend
     envVars:
       - key: DATABASE_URL
         fromDatabase:
@@ -15,3 +15,10 @@ services:
         value: secret refresh token
       - key: WS_JWT_SECRET
         value: web socket secret
+    dockerfilePath: Dockerfile
+    dockerComposeFilePath: docker-compose.yml
+    dockerComposeService: backend
+    databases:
+      - name: postgres-db
+        plan: starter-0
+    healthCheckCommand: curl -f http://localhost:3000/health
