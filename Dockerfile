@@ -43,6 +43,8 @@ RUN npm install
 
 COPY . .
 
+RUN ls -la
+
 RUN npm run build
 # TODO: CHECK IF THIS IS CORRECT
 RUN npx prisma generate
